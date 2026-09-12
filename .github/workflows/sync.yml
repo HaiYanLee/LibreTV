@@ -1,0 +1,35 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每天北京时间早上 8 点（UTC 时间 0:00）自动运行一次
+    - cron: '0 0 * * *'
+  # 支持在 GitHub 界面手动点击运行
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sync from LibreSpark/LibreTV
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Fetch and Merge Upstream
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 添加上游仓库 LibreSpark/LibreTV
+          git remote add upstream https://github.com/LibreSpark/LibreTV.git
+          git fetch upstream
+          
+          git checkout main
+          # 自动合并上游 main 分支
+          git merge upstream/main --no-edit
+          
+          # 推送到你自己的 main 分支
+          git push origin main
